@@ -1,0 +1,33 @@
+services:
+  workspace:
+    container_name: test_project_devcontainer
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    image: test_project_devcontainer:local
+    command: sleep infinity
+
+    # env_file:
+    #   - .devcontainer/.env
+
+    ports:
+      - "3000:3000" # 프론트엔드 (Next.js 개발 서버)
+      - "5173:5173" # 프론트엔드 (Vite 개발 서버)
+      - "18080:8091" # 백엔드 (Java 개발 서버)
+
+    environment:
+      TZ: Asia/Seoul
+
+    volumes:
+      - ..:${containerWorkspaceFolder}:cached
+
+    networks:
+      - test_project_network
+
+    # depends_on:
+    #   - db
+
+networks:
+  test_project_network:
+    # external: true
+    driver: bridge # 같은 이름의 네트워크는 자동 merge

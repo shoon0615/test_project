@@ -1,0 +1,43 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.8
+    profiles: ["search"]
+
+    ports:
+      - "19200:9200" # REST
+      - "9300:9300" # cluster (내부 통신용, single-node 는 필요없을수도)
+
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # 보안 비활성화 (개발용)
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m # 메모리 제한(512MB ~ 1GB)
+
+    networks:
+      - test_project_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.18.8
+    profiles: ["search"]
+
+    ports:
+      - "15601:5601"
+
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+    networks:
+      - test_project_network
+
+    depends_on:
+      - elasticsearch
+
+networks:
+  test_project_network:
+    driver: bridge # 네트워크 생성
+
+volumes:
+  es_data:
+    driver: local

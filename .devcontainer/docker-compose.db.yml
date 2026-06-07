@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17
+    profiles: ["db"]
+
+    ports:
+      - "15432:5432"
+
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_DB}
+      TZ: Asia/Seoul
+      # PGDATA: /var/lib/postgresql/data/18/docker    # postgres:18 부터는 volume 하위에 PGDATA 값 필수
+
+    # Docker 컨테이너 자체 메모리 제한
+    # mem_limit: 512m
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - test_project_network
+
+  redis:
+    image: redis:7.4
+    profiles: ["db"]
+
+    ports:
+      - "16379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - test_project_network
+
+networks:
+  test_project_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
