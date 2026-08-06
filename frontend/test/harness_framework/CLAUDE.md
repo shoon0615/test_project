@@ -1,21 +1,37 @@
-# 프로젝트: {프로젝트명}
+# 프로젝트: Comment Lens
 
 ## 기술 스택
-- {프레임워크 (예: Next.js 15)}
-- {언어 (예: TypeScript strict mode)}
-- {스타일링 (예: Tailwind CSS)}
+- Vite + React + TypeScript strict mode
+- Tailwind CSS
+- Vitest + React Testing Library
+- 정적 SPA, Web Worker 기반 브라우저 분석
 
 ## 아키텍처 규칙
-- CRITICAL: {절대 지켜야 할 규칙 1 (예: 모든 API 로직은 app/api/ 라우트 핸들러에서만 처리)}
-- CRITICAL: {절대 지켜야 할 규칙 2 (예: 클라이언트 컴포넌트에서 직접 외부 API를 호출하지 말 것)}
-- {일반 규칙 (예: 컴포넌트는 components/ 폴더에, 타입은 types/ 폴더에 분리)}
+- CRITICAL: 자체 백엔드, 데이터베이스, 로그인 기능을 추가하지 않는다.
+- CRITICAL: 댓글 원문과 분석 결과를 외부 AI/분석 서비스로 전송하지 않는다.
+- CRITICAL: YouTube API 키를 소스에 하드코딩하지 않는다. `VITE_YOUTUBE_API_KEY`로 주입하고 공개 키라는 전제하에 referrer/API/할당량 제한을 문서화한다.
+- CRITICAL: 모든 인사이트는 언급량 또는 대표 댓글을 근거로 가져야 한다. 근거가 부족하면 임의로 문장을 생성하지 않는다.
+- Google API 응답은 `features/youtube`에서 도메인 타입으로 변환하고 UI가 외부 응답 구조에 직접 의존하지 않게 한다.
+- CPU 집약적 댓글 분석은 Web Worker에서 실행한다.
+- 댓글 작성자의 이름, 프로필 이미지, 채널 ID를 저장하거나 민감 속성을 추론하지 않는다.
+- 컴포넌트는 표현에 집중하고 URL 파싱, 분석, 집계와 저장 로직은 각각 독립된 순수 모듈로 둔다.
 
 ## 개발 프로세스
-- CRITICAL: 새 기능 구현 시 반드시 테스트를 먼저 작성하고, 테스트가 통과하는 구현을 작성할 것 (TDD)
-- 커밋 메시지는 conventional commits 형식을 따를 것 (feat:, fix:, docs:, refactor:)
+- CRITICAL: 새 기능 구현 시 테스트를 먼저 작성하고 테스트가 통과하는 구현을 작성한다(TDD).
+- 실제 YouTube API를 테스트에서 호출하지 않고 고정 fixture와 mock adapter를 사용한다.
+- URL 오류, 댓글 비활성화, 댓글 없음, 할당량 초과, 네트워크 오류 상태를 정상 흐름과 함께 테스트한다.
+- 커밋 메시지는 conventional commits 형식을 따른다(`feat:`, `fix:`, `docs:`, `refactor:`).
+
+## 접근성 및 UI 규칙
+- 키보드만으로 URL 입력, 분석 시작, 오류 복구와 리포트 탐색이 가능해야 한다.
+- 색상만으로 감정을 구분하지 않고 라벨과 수치를 병기한다.
+- 실제로 알 수 없는 분석 진행률을 가짜 백분율로 표현하지 않는다.
+- 사용자 댓글은 HTML로 삽입하지 않고 텍스트로 렌더링한다.
 
 ## 명령어
-npm run dev      # 개발 서버
-npm run build    # 프로덕션 빌드
-npm run lint     # ESLint
-npm run test     # 테스트
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run test
+```
