@@ -11,12 +11,18 @@ export const FEEDBACK_TOPICS = [
   'delivery',
   'editing',
   'audio',
-  'pacing',
-  'subtitles',
+  'pace',
+  'captions',
   'correction',
-  'follow-up-request',
+  'follow-up',
 ] as const;
 export type FeedbackTopic = (typeof FEEDBACK_TOPICS)[number];
+
+export const TOPIC_INTENTS = ['praise', 'complaint', 'question', 'request'] as const;
+export type TopicIntent = (typeof TOPIC_INTENTS)[number];
+
+export const COMMENT_SAFETY_FLAGS = ['personal-attack', 'hate-or-harassment', 'sensitive-info'] as const;
+export type CommentSafetyFlag = (typeof COMMENT_SAFETY_FLAGS)[number];
 
 export const EXCLUDE_REASONS = [
   'duplicate',
