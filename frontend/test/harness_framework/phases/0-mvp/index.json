@@ -61,7 +61,10 @@
     {
       "step": 7,
       "name": "report-builder",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T17:47:57+0900",
+      "completed_at": "2026-08-07T17:53:35+0900",
+      "summary": "전처리·감정·주제 결과를 AnalysisReport로 집계하는 템플릿 기반 리포트 빌더와 largest-remainder 반올림 테스트/구현을 추가함"
     },
     {
       "step": 8,
