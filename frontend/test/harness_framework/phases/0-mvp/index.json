@@ -31,7 +31,7 @@
       "name": "youtube-api",
       "status": "completed",
       "started_at": "2026-08-07T17:18:10+0900",
-      "completed_at": "2026-08-07T17:26:59+0900",
+      "completed_at": "2026-08-07T17:28:11+0900",
       "summary": "fetch 주입 가능한 YouTube API 어댑터, 응답 스키마 검증, 오류 매핑, timeout/retry/페이지네이션 테스트를 구현함"
     },
     {
