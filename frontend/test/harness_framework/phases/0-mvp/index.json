@@ -69,7 +69,10 @@
     {
       "step": 8,
       "name": "analysis-worker",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T17:54:07+0900",
+      "completed_at": "2026-08-07T18:01:24+0900",
+      "summary": "런타임 검증을 포함한 Analysis Worker 파이프라인과 progress/cancel/stale/crash 재시도 client 및 테스트를 구현함"
     },
     {
       "step": 9,
