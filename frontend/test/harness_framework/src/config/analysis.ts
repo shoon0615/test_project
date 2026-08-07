@@ -19,6 +19,15 @@ export const REQUEST_POLICY = {
   retryBackoffMs: [500, 1_500],
 } as const;
 
+export const SENTIMENT_ANALYSIS = {
+  minimumAbsoluteScore: 0.18,
+  minimumScoreDifference: 0.28,
+  negationWindow: 3,
+  contrastBeforeWeight: 0.65,
+  contrastAfterWeight: 1.35,
+  maxConfidenceEvidence: 5,
+} as const;
+
 export function calculateMinimumEvidenceCount(sampleSize: number): number {
   const normalizedSampleSize = Math.max(0, Math.floor(sampleSize));
 
