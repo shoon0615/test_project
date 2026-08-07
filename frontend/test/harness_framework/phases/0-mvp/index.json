@@ -1,0 +1,118 @@
+{
+  "project": "Comment Lens",
+  "phase": "0-mvp",
+  "steps": [
+    {
+      "step": 0,
+      "name": "project-setup",
+      "status": "completed",
+      "started_at": "2026-08-07T16:17:51+0900",
+      "completed_at": "2026-08-07T16:49:55+0900",
+      "summary": "Vite React TypeScript strict SPA와 Tailwind, Vitest/RTL/jsdom, ESLint 및 기본 src 구조와 smoke test를 구성함"
+    },
+    {
+      "step": 1,
+      "name": "domain-types",
+      "status": "completed",
+      "started_at": "2026-08-07T16:49:55+0900",
+      "completed_at": "2026-08-07T17:11:03+0900",
+      "summary": "핵심 도메인 타입, 분석 설정 상수, 리포트/Worker/AppError 런타임 validator와 불변 조건 테스트를 구현함"
+    },
+    {
+      "step": 2,
+      "name": "youtube-url",
+      "status": "completed",
+      "started_at": "2026-08-07T17:13:54+0900",
+      "completed_at": "2026-08-07T17:18:09+0900",
+      "summary": "YouTube URL 순수 파서와 지원/거부/변형 테이블 테스트를 구현함"
+    },
+    {
+      "step": 3,
+      "name": "youtube-api",
+      "status": "completed",
+      "started_at": "2026-08-07T17:18:10+0900",
+      "completed_at": "2026-08-07T17:28:11+0900",
+      "summary": "fetch 주입 가능한 YouTube API 어댑터, 응답 스키마 검증, 오류 매핑, timeout/retry/페이지네이션 테스트를 구현함"
+    },
+    {
+      "step": 4,
+      "name": "comment-preprocessing",
+      "status": "completed",
+      "started_at": "2026-08-07T17:28:11+0900",
+      "summary": "댓글 원문과 분석용 정규화 텍스트를 분리하고 언어 판별, placeholder, hash 중복 제거와 제외 사유 전처리 테스트/구현을 추가함",
+      "completed_at": "2026-08-07T17:36:52+0900"
+    },
+    {
+      "step": 5,
+      "name": "sentiment-analysis",
+      "status": "completed",
+      "started_at": "2026-08-07T17:36:52+0900",
+      "summary": "고정 감정 평가 fixture와 한국어/영어 사전 기반 결정론적 감정 분석기 및 단위 테스트를 구현함",
+      "completed_at": "2026-08-07T17:43:07+0900"
+    },
+    {
+      "step": 6,
+      "name": "topic-analysis",
+      "status": "completed",
+      "started_at": "2026-08-07T17:43:07+0900",
+      "summary": "버전 관리되는 한국어/영어 주제 규칙과 다중 라벨 주제·의도·안전 플래그 분석기 및 fixture 테스트를 구현함",
+      "completed_at": "2026-08-07T17:47:57+0900"
+    },
+    {
+      "step": 7,
+      "name": "report-builder",
+      "status": "completed",
+      "started_at": "2026-08-07T17:47:57+0900",
+      "completed_at": "2026-08-07T17:54:07+0900",
+      "summary": "전처리·감정·주제 결과를 AnalysisReport로 집계하는 템플릿 기반 리포트 빌더와 largest-remainder 반올림 테스트/구현을 추가함"
+    },
+    {
+      "step": 8,
+      "name": "analysis-worker",
+      "status": "completed",
+      "started_at": "2026-08-07T17:54:07+0900",
+      "completed_at": "2026-08-07T18:03:13+0900",
+      "summary": "런타임 검증을 포함한 Analysis Worker 파이프라인과 progress/cancel/stale/crash 재시도 client 및 테스트를 구현함"
+    },
+    {
+      "step": 9,
+      "name": "report-storage",
+      "status": "completed",
+      "started_at": "2026-08-07T18:03:13+0900",
+      "completed_at": "2026-08-07T18:09:47+0900",
+      "summary": "대표 댓글만 보존하는 최근 리포트 localStorage 저장소와 정렬 설정 저장소, 손상 격리·quota 재시도·storage event 테스트를 구현함"
+    },
+    {
+      "step": 10,
+      "name": "analysis-orchestrator",
+      "status": "completed",
+      "started_at": "2026-08-07T18:09:47+0900",
+      "completed_at": "2026-08-07T18:19:56+0900",
+      "summary": "명시적 분석 상태 머신, jobId 기반 orchestrator와 React hook adapter를 테스트 우선으로 구현함"
+    },
+    {
+      "step": 11,
+      "name": "analysis-ui",
+      "status": "completed",
+      "started_at": "2026-08-07T18:19:56+0900",
+      "completed_at": "2026-08-07T18:27:09+0900",
+      "summary": "URL 입력, 영상 요약, 최근 리포트, 진행/취소 및 empty/error/cancelled/partial 상태 UI와 컴포넌트 테스트를 구현함"
+    },
+    {
+      "step": 12,
+      "name": "report-ui",
+      "status": "pending"
+    },
+    {
+      "step": 13,
+      "name": "accessibility-print",
+      "status": "pending"
+    },
+    {
+      "step": 14,
+      "name": "integration-tests",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-08-07T16:17:51+0900"
+}
