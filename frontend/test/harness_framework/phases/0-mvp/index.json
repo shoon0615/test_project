@@ -37,7 +37,9 @@
     {
       "step": 4,
       "name": "comment-preprocessing",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T17:28:11+0900",
+      "summary": "댓글 원문과 분석용 정규화 텍스트를 분리하고 언어 판별, placeholder, hash 중복 제거와 제외 사유 전처리 테스트/구현을 추가함"
     },
     {
       "step": 5,
