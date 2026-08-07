@@ -79,7 +79,7 @@
       "name": "report-storage",
       "status": "completed",
       "started_at": "2026-08-07T18:03:13+0900",
-      "completed_at": "2026-08-07T18:09:14+0900",
+      "completed_at": "2026-08-07T18:09:47+0900",
       "summary": "대표 댓글만 보존하는 최근 리포트 localStorage 저장소와 정렬 설정 저장소, 손상 격리·quota 재시도·storage event 테스트를 구현함"
     },
     {
