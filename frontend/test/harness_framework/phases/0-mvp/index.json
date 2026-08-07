@@ -93,7 +93,10 @@
     {
       "step": 11,
       "name": "analysis-ui",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T18:19:56+0900",
+      "completed_at": "2026-08-07T18:28:00+0900",
+      "summary": "URL 입력, 영상 요약, 최근 리포트, 진행/취소 및 empty/error/cancelled/partial 상태 UI와 컴포넌트 테스트를 구현함"
     },
     {
       "step": 12,
