@@ -243,7 +243,6 @@ class StepExecutor:
                 # workspace-write sandbox cannot perform in this environment.
                 "--sandbox", "danger-full-access",
                 "--ephemeral",
-                "--json",
                 "-",
             ],
             cwd=self._root,

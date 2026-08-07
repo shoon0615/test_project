@@ -437,7 +437,7 @@ class TestInvokeCodex:
         assert "--sandbox" in cmd
         assert "danger-full-access" in cmd
         assert "--ephemeral" in cmd
-        assert "--json" in cmd
+        assert "--json" not in cmd
         assert cmd[-1] == "-"
         assert "PREAMBLE" in mock_run.call_args.kwargs["input"]
         assert "UI를 구현하세요" in mock_run.call_args.kwargs["input"]
