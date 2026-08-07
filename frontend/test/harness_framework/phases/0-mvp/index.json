@@ -85,7 +85,10 @@
     {
       "step": 10,
       "name": "analysis-orchestrator",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T18:09:47+0900",
+      "completed_at": "2026-08-07T18:19:14+0900",
+      "summary": "명시적 분석 상태 머신, jobId 기반 orchestrator와 React hook adapter를 테스트 우선으로 구현함"
     },
     {
       "step": 11,
