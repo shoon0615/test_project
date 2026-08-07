@@ -58,13 +58,15 @@ class StepExecutor:
     CHORE_MSG = "chore({phase}): step {num} output"
     TZ = timezone(timedelta(hours=9))
 
-    def __init__(self, phase_dir_name: str, *, auto_push: bool = False):
+    def __init__(self, phase_dir_name: str, *, auto_push: bool = False,
+                 through_step: Optional[int] = None):
         self._root = str(ROOT)
         self._phases_dir = ROOT / "phases"
         self._phase_dir = self._phases_dir / phase_dir_name
         self._phase_dir_name = phase_dir_name
         self._top_index_file = self._phases_dir / "index.json"
         self._auto_push = auto_push
+        self._through_step = through_step
 
         if not self._phase_dir.is_dir():
             print(f"ERROR: {self._phase_dir} not found")
@@ -87,7 +89,14 @@ class StepExecutor:
         guardrails = self._load_guardrails()
         self._ensure_created_at()
         self._execute_all_steps(guardrails)
-        self._finalize()
+        if self._all_steps_completed():
+            self._finalize()
+        else:
+            print(f"\n  Checkpoint reached: step {self._through_step} completed.")
+
+    def _all_steps_completed(self) -> bool:
+        index = self._read_json(self._index_file)
+        return all(step["status"] == "completed" for step in index["steps"])
 
     # --- timestamps ---
 
@@ -381,6 +390,9 @@ class StepExecutor:
                 print("\n  All steps completed!")
                 return
 
+            if self._through_step is not None and pending["step"] > self._through_step:
+                return
+
             step_num = pending["step"]
             for s in index["steps"]:
                 if s["step"] == step_num and "started_at" not in s:
@@ -420,9 +432,17 @@ def main():
     parser = argparse.ArgumentParser(description="Harness Step Executor")
     parser.add_argument("phase_dir", help="Phase directory name (e.g. 0-mvp)")
     parser.add_argument("--push", action="store_true", help="Push branch after completion")
+    parser.add_argument(
+        "--through-step", type=int, metavar="N",
+        help="Complete steps through N, then stop without marking the phase completed",
+    )
     args = parser.parse_args()
 
-    StepExecutor(args.phase_dir, auto_push=args.push).run()
+    StepExecutor(
+        args.phase_dir,
+        auto_push=args.push,
+        through_step=args.through_step,
+    ).run()
 
 
 if __name__ == "__main__":
