@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "domain-types",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T16:49:55+0900",
+      "completed_at": "2026-08-07T17:11:03+0900",
+      "summary": "핵심 도메인 타입, 분석 설정 상수, 리포트/Worker/AppError 런타임 validator와 불변 조건 테스트를 구현함"
     },
     {
       "step": 2,
