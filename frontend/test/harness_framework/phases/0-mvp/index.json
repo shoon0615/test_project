@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "youtube-url",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-08-07T17:13:54+0900",
+      "completed_at": "2026-08-07T17:17:35+0900",
+      "summary": "YouTube URL 순수 파서와 지원/거부/변형 테이블 테스트를 구현함"
     },
     {
       "step": 3,
