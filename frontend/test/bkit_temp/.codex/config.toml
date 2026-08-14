@@ -4,3 +4,6 @@ args = ["./.bkit-codex/packages/mcp-server/index.js"]
 startup_timeout_sec = 10
 tool_timeout_sec = 60
 required = true
+
+[mcp_servers.bkit.tools.bkit_pre_write_check]
+approval_mode = "approve"

@@ -1,0 +1,87 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-08-14T06:35:50.399Z",
+  "activeFeatures": [
+    "team-crud-system"
+  ],
+  "primaryFeature": "team-crud-system",
+  "features": {
+    "team-crud-system": {
+      "phase": "do",
+      "matchRate": null,
+      "iterationCount": 0,
+      "documents": {},
+      "taskChain": [
+        {
+          "phase": "plan",
+          "status": "completed",
+          "createdAt": "2026-08-14T06:33:47.134Z",
+          "completedAt": "2026-08-14T06:35:48.917Z"
+        },
+        {
+          "phase": "design",
+          "status": "completed",
+          "createdAt": "2026-08-14T06:33:47.134Z",
+          "completedAt": "2026-08-14T06:35:50.399Z"
+        },
+        {
+          "phase": "do",
+          "status": "active",
+          "createdAt": "2026-08-14T06:33:47.134Z"
+        },
+        {
+          "phase": "check",
+          "status": "pending",
+          "createdAt": "2026-08-14T06:33:47.134Z"
+        },
+        {
+          "phase": "report",
+          "status": "pending",
+          "createdAt": "2026-08-14T06:33:47.134Z"
+        }
+      ],
+      "timestamps": {
+        "started": "2026-08-14T06:33:47.207Z",
+        "lastUpdated": "2026-08-14T06:35:50.399Z"
+      }
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Starter",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-08-14T06:33:47.106Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-08-14T06:35:50.399Z"
+  },
+  "history": [
+    {
+      "feature": "team-crud-system",
+      "from": "plan",
+      "to": "design",
+      "timestamp": "2026-08-14T06:35:48.911Z"
+    },
+    {
+      "feature": "team-crud-system",
+      "action": "phase_complete",
+      "phase": "plan",
+      "nextPhase": "design",
+      "timestamp": "2026-08-14T06:35:48.913Z"
+    },
+    {
+      "feature": "team-crud-system",
+      "from": "design",
+      "to": "do",
+      "timestamp": "2026-08-14T06:35:50.395Z"
+    },
+    {
+      "feature": "team-crud-system",
+      "action": "phase_complete",
+      "phase": "design",
+      "nextPhase": "do",
+      "timestamp": "2026-08-14T06:35:50.396Z"
+    }
+  ]
+}
