@@ -7,3 +7,9 @@ required = true
 
 [mcp_servers.bkit.tools.bkit_pre_write_check]
 approval_mode = "approve"
+
+[mcp_servers.bkit.tools.bkit_post_write]
+approval_mode = "approve"
+
+[mcp_servers.bkit.tools.bkit_pdca_analyze]
+approval_mode = "approve"

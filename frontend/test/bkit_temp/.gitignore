@@ -1,2 +1,21 @@
 # bkit-codex
 .bkit-codex/
+
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# test output
+test-results/
+playwright-report/
+coverage/
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# environment
+.env
+.env.local
