@@ -14,12 +14,24 @@ type EditPostPageProps = {
   params: Promise<{ id: string }>;
 };
 
+type LoadState = {
+  id: string;
+  post: Post | null;
+  error: "not-found" | "request" | null;
+};
+
 export default function EditPostPage({ params }: EditPostPageProps) {
   const { id } = use(params);
   const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
-  const [error, setError] = useState<"not-found" | "request" | null>(null);
+  const [loadState, setLoadState] = useState<LoadState>({
+    id: "",
+    post: null,
+    error: null,
+  });
   const [retryKey, setRetryKey] = useState(0);
+  const isCurrentLoad = loadState.id === id;
+  const post = isCurrentLoad ? loadState.post : null;
+  const error = isCurrentLoad ? loadState.error : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +39,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     getPost(id).then(
       (nextPost) => {
         if (!cancelled) {
-          setPost(nextPost);
+          setLoadState({ id, post: nextPost, error: null });
         }
       },
       (loadError: unknown) => {
@@ -35,7 +47,11 @@ export default function EditPostPage({ params }: EditPostPageProps) {
           return;
         }
 
-        setError(loadError instanceof ApiError && loadError.status === 404 ? "not-found" : "request");
+        setLoadState({
+          id,
+          post: null,
+          error: loadError instanceof ApiError && loadError.status === 404 ? "not-found" : "request",
+        });
       },
     );
 
@@ -45,8 +61,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   }, [id, retryKey]);
 
   const handleRetry = () => {
-    setPost(null);
-    setError(null);
+    setLoadState({ id, post: null, error: null });
     setRetryKey((currentKey) => currentKey + 1);
   };
 

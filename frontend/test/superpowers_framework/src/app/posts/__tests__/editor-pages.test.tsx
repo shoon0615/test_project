@@ -42,14 +42,30 @@ const existingPost = {
   createdAt: "2026-08-17T09:00:00.000Z",
 };
 
+const nextPost = {
+  id: "4",
+  title: "다음 제목",
+  author: "하림",
+  content: "다음 본문",
+  createdAt: "2026-08-18T09:00:00.000Z",
+};
+
+function EditPageContainer({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<p>페이지를 준비하는 중입니다…</p>}>
+      <EditPostPage params={params} />
+    </Suspense>
+  );
+}
+
 async function renderEditPage(params = Promise.resolve({ id: "3" })) {
+  let view: ReturnType<typeof render>;
+
   await act(async () => {
-    render(
-      <Suspense fallback={<p>페이지를 준비하는 중입니다…</p>}>
-        <EditPostPage params={params} />
-      </Suspense>,
-    );
+    view = render(<EditPageContainer params={params} />);
   });
+
+  return view!;
 }
 
 async function fillAndSubmitForm(values: typeof draft, submitLabel: string) {
@@ -144,6 +160,43 @@ describe("post editor routes", () => {
     expect(await screen.findByDisplayValue(existingPost.title)).toBeInTheDocument();
     expect(getPost).toHaveBeenCalledTimes(2);
     expect(getPost).toHaveBeenLastCalledWith("3");
+  });
+
+  it("loads a new ID after a previous not-found error", async () => {
+    vi.mocked(getPost)
+      .mockRejectedValueOnce(new ApiError("게시글을 찾을 수 없습니다.", 404))
+      .mockResolvedValueOnce(nextPost);
+    const view = await renderEditPage(Promise.resolve({ id: "missing" }));
+
+    expect(await screen.findByText("게시글을 찾을 수 없습니다.")).toBeInTheDocument();
+
+    await act(async () => {
+      view.rerender(<EditPageContainer params={Promise.resolve({ id: "4" })} />);
+    });
+
+    expect(await screen.findByDisplayValue(nextPost.title)).toBeInTheDocument();
+    expect(getPost).toHaveBeenLastCalledWith("4");
+  });
+
+  it("shows loading instead of a previous form when the route ID changes", async () => {
+    const pendingNextPost = deferred<typeof nextPost>();
+    vi.mocked(getPost)
+      .mockResolvedValueOnce(existingPost)
+      .mockReturnValueOnce(pendingNextPost.promise);
+    const view = await renderEditPage();
+
+    expect(await screen.findByDisplayValue(existingPost.title)).toBeInTheDocument();
+
+    await act(async () => {
+      view.rerender(<EditPageContainer params={Promise.resolve({ id: "4" })} />);
+    });
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "게시글을 불러오는 중입니다…",
+    );
+
+    pendingNextPost.resolve(nextPost);
+    expect(await screen.findByDisplayValue(nextPost.title)).toBeInTheDocument();
   });
 
   it("shows a list link when the edited post does not exist", async () => {
