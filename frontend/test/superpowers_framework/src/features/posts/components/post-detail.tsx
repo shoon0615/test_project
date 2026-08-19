@@ -52,7 +52,7 @@ export function PostDetail({ post, onDelete }: PostDetailProps) {
           </p>
         </div>
         <div className="button-group">
-          <Link className="button" href={`/posts/${post.id}/edit`}>
+          <Link className="button" href={`/posts/${encodeURIComponent(post.id)}/edit`}>
             수정
           </Link>
           <button className="button" type="button" onClick={handleDelete} disabled={isDeleting}>

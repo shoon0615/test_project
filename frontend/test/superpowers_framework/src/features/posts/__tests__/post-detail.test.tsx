@@ -93,6 +93,17 @@ describe("post detail", () => {
     );
   });
 
+  it("encodes hostile post IDs in the edit destination", () => {
+    const hostilePost = { ...samplePost, id: "summer/plan?draft#section" };
+
+    render(<PostDetail post={hostilePost} onDelete={vi.fn()} />);
+
+    expect(screen.getByRole("link", { name: "수정" })).toHaveAttribute(
+      "href",
+      "/posts/summer%2Fplan%3Fdraft%23section/edit",
+    );
+  });
+
   it("does not delete when confirmation is cancelled", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     const onDelete = vi.fn();
