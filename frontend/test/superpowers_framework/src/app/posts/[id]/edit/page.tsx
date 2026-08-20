@@ -73,7 +73,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   if (error === "not-found") {
     return (
       <main className="shell">
-        <section className="status-panel status-panel--error">
+        <section className="status-panel status-panel--error" role="alert">
           <p>게시글을 찾을 수 없습니다.</p>
           <Link className="button" href="/">
             목록으로

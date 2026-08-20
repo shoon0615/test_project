@@ -28,6 +28,13 @@ textarea {
   font: inherit;
 }
 
+h1,
+h2,
+p,
+li {
+  overflow-wrap: anywhere;
+}
+
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
@@ -71,6 +78,23 @@ a:focus-visible {
   border-color: var(--danger);
 }
 
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-header > div:first-child {
+  min-width: 0;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .form-control {
   display: grid;
   gap: 0.375rem;
@@ -84,6 +108,10 @@ a:focus-visible {
   border-radius: 0.375rem;
   background: white;
   color: var(--ink);
+}
+
+.post-content {
+  white-space: pre-wrap;
 }
 
 .status-panel {
@@ -110,6 +138,14 @@ a:focus-visible {
   }
 
   .button-group .button {
+    width: 100%;
+  }
+
+  .page-header {
+    display: grid;
+  }
+
+  .page-header > .button {
     width: 100%;
   }
 }

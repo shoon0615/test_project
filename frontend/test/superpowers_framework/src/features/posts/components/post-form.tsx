@@ -106,7 +106,7 @@ export function PostForm({
         const Control = key === "content" ? "textarea" : "input";
 
         return (
-          <div key={key}>
+          <div className="form-control" key={key}>
             <label htmlFor={id}>{label}</label>
             <Control
               id={id}
@@ -129,11 +129,11 @@ export function PostForm({
         {submitError}
       </div>
 
-      <div>
-        <a href={cancelHref} className="button button-secondary">
+      <div className="button-group">
+        <a href={cancelHref} className="button button--secondary">
           취소
         </a>
-        <button type="submit" disabled={isSubmitting}>
+        <button className="button" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "저장 중…" : submitLabel}
         </button>
       </div>

@@ -206,7 +206,7 @@ describe("post editor routes", () => {
 
     await renderEditPage();
 
-    expect(await screen.findByText("게시글을 찾을 수 없습니다.")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent("게시글을 찾을 수 없습니다.");
     expect(screen.getByRole("link", { name: "목록으로" })).toHaveAttribute("href", "/");
   });
 });

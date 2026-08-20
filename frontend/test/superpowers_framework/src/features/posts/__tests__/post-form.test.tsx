@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { PostForm } from "../components/post-form";
@@ -49,6 +49,22 @@ describe("PostForm", () => {
     expect(screen.getByRole("button", { name: "저장 중…" })).toBeDisabled();
   });
 
+  it("prevents duplicate submissions before the disabled button is rendered", async () => {
+    const pending = new Promise<void>(() => undefined);
+    const onSubmit = vi.fn(() => pending);
+    render(<PostForm mode="create" cancelHref="/posts" onSubmit={onSubmit} />);
+
+    await userEvent.type(screen.getByLabelText("제목"), "첫 글");
+    await userEvent.type(screen.getByLabelText("작성자"), "민수");
+    await userEvent.type(screen.getByLabelText("내용"), "반갑습니다");
+    const form = screen.getByRole("button", { name: "게시글 등록" }).closest("form");
+
+    fireEvent.submit(form!);
+    fireEvent.submit(form!);
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
   it("preserves values and shows an error when submission is rejected", async () => {
     const onSubmit = vi.fn().mockRejectedValueOnce(new Error("network"));
     render(<PostForm mode="create" cancelHref="/posts" onSubmit={onSubmit} />);
@@ -76,5 +92,34 @@ describe("PostForm", () => {
 
     expect(screen.getByRole("link", { name: "취소" })).toHaveAttribute("href", "/posts/42");
     expect(screen.getByRole("button", { name: "게시글 수정" })).toBeInTheDocument();
+  });
+
+  it("starts an edit form with the supplied post values", () => {
+    render(
+      <PostForm
+        mode="edit"
+        cancelHref="/posts/42"
+        initialValue={{ title: "기존 제목", author: "지수", content: "기존 본문" }}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("제목")).toHaveValue("기존 제목");
+    expect(screen.getByLabelText("작성자")).toHaveValue("지수");
+    expect(screen.getByLabelText("내용")).toHaveValue("기존 본문");
+  });
+
+  it("styles the cancel action as secondary", () => {
+    render(<PostForm mode="edit" cancelHref="/posts/42" onSubmit={vi.fn()} />);
+
+    expect(screen.getByRole("link", { name: "취소" })).toHaveClass("button--secondary");
+  });
+
+  it("groups each labelled control for the responsive form layout", () => {
+    render(<PostForm mode="create" cancelHref="/posts" onSubmit={vi.fn()} />);
+
+    for (const label of ["제목", "작성자", "내용"]) {
+      expect(screen.getByLabelText(label).closest(".form-control")).not.toBeNull();
+    }
   });
 });

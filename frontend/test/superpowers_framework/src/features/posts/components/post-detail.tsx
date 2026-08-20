@@ -62,7 +62,7 @@ export function PostDetail({ post, onDelete }: PostDetailProps) {
       </header>
 
       {deleteError ? <p role="alert">{deleteError}</p> : null}
-      <p style={{ whiteSpace: "pre-wrap" }}>{post.content}</p>
+      <p className="post-content">{post.content}</p>
     </article>
   );
 }

@@ -81,7 +81,7 @@ describe("post detail", () => {
     expect(screen.getByRole("heading", { name: samplePost.title })).toBeInTheDocument();
     expect(
       screen.getByText((_, element) => element?.textContent === samplePost.content),
-    ).toHaveStyle({ whiteSpace: "pre-wrap" });
+    ).toHaveClass("post-content");
     expect(screen.getByText(samplePost.author)).toBeInTheDocument();
     expect(screen.getByText("2026. 8. 17.")).toHaveAttribute(
       "dateTime",
@@ -168,7 +168,7 @@ describe("post detail", () => {
 
     await renderDetailPage();
 
-    expect(await screen.findByText("게시글을 찾을 수 없습니다.")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent("게시글을 찾을 수 없습니다.");
     expect(screen.getByRole("link", { name: "목록으로" })).toHaveAttribute("href", "/");
   });
 
