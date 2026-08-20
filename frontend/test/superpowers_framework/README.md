@@ -4,7 +4,7 @@ Next.js와 `json-server`로 동작하는 로컬 게시판 CRUD 예제입니다. 
 
 ## Prerequisites
 
-- Node.js 20 이상
+- Node.js >=22.22.2
 - npm
 - Chromium용 Playwright 브라우저 (E2E 테스트를 처음 실행할 때 설치)
 

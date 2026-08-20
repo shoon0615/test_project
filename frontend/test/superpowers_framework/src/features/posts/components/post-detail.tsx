@@ -52,6 +52,9 @@ export function PostDetail({ post, onDelete }: PostDetailProps) {
           </p>
         </div>
         <div className="button-group">
+          <Link className="button" href="/">
+            목록
+          </Link>
           <Link className="button" href={`/posts/${encodeURIComponent(post.id)}/edit`}>
             수정
           </Link>

@@ -17,31 +17,33 @@ describe("posts api", () => {
   });
 
   it("sorts posts newest first", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          {
+            id: "1",
+            title: "먼저",
+            author: "민수",
+            content: "A",
+            createdAt: "2026-08-16T09:00:00.000Z",
+          },
+          {
+            id: "2",
+            title: "나중",
+            author: "지수",
+            content: "B",
+            createdAt: "2026-08-17T09:00:00.000Z",
+          },
+        ]),
+      ),
+    );
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify([
-            {
-              id: "1",
-              title: "먼저",
-              author: "민수",
-              content: "A",
-              createdAt: "2026-08-16T09:00:00.000Z",
-            },
-            {
-              id: "2",
-              title: "나중",
-              author: "지수",
-              content: "B",
-              createdAt: "2026-08-17T09:00:00.000Z",
-            },
-          ]),
-        ),
-      ),
+      fetchMock,
     );
 
     await expect(listPosts()).resolves.toMatchObject([{ id: "2" }, { id: "1" }]);
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:4000/posts", {});
   });
 
   it("gets a post detail with an encoded id", async () => {
@@ -70,6 +72,7 @@ describe("posts api", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("http://localhost:4000/posts");
   });
 
   it("keeps createdAt out of PATCH data", async () => {
@@ -89,6 +92,7 @@ describe("posts api", () => {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
     });
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("http://localhost:4000/posts/1");
   });
 
   it("deletes a post without trying to parse a response body", async () => {

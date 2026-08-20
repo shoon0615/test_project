@@ -19,5 +19,6 @@ test("a visitor can create, read, update, and delete a post", async ({ page }) =
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "삭제" }).click();
   await expect(page).toHaveURL("/");
+  await expect(page.getByRole("link", { name: "팀에 공유하는 안내" })).toBeVisible();
   await expect(page.getByRole("link", { name: title })).toHaveCount(0);
 });

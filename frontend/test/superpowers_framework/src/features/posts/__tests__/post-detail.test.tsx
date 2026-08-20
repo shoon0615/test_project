@@ -91,6 +91,7 @@ describe("post detail", () => {
       "href",
       "/posts/3/edit",
     );
+    expect(screen.getByRole("link", { name: "목록" })).toHaveAttribute("href", "/");
   });
 
   it("encodes hostile post IDs in the edit destination", () => {
