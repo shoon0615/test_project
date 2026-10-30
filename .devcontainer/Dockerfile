@@ -1,11 +1,12 @@
-# Dev workspace image: same family as previous compose `image` (devcontainers/base:bullseye).
+# Dev workspace image: Debian Bookworm.
 # Claude Code + Codex CLI are baked here so installs are cached in image layers.
 #
 # Note: devcontainer.json "features" (Node, Python, Java, etc.) are applied by the Dev
 # Containers tooling on top of this image. After the first Rebuild, confirm tools from
 # features still appear in PATH; if not, adjust FROM/features per containers.dev docs.
 
-FROM mcr.microsoft.com/devcontainers/base:bullseye
+# Bullseye security package downloads returned 404 during feature installation.
+FROM mcr.microsoft.com/devcontainers/base:bookworm
 
 USER root
 
@@ -41,5 +42,5 @@ WORKDIR /home/vscode
 ENV PATH="/home/vscode/.local/bin:/usr/local/bin:${PATH}"
 
 # Native installer (non-interactive; uses downloads.claude.ai)
-RUN curl -fsSL https://claude.ai/install.sh | bash \
-    && claude --version
+# RUN curl -fsSL https://claude.ai/install.sh | bash \
+#     && claude --version

@@ -1,0 +1,55 @@
+{
+  "teams": [
+    {
+      "id": "team-1",
+      "name": "플랫폼 팀",
+      "owner": "김민준",
+      "members": 6,
+      "status": "active",
+      "description": "공통 플랫폼과 개발자 경험을 담당한다.",
+      "createdAt": "2026-08-14T00:00:00.000Z",
+      "updatedAt": "2026-08-14T00:00:00.000Z"
+    },
+    {
+      "id": "team-2",
+      "name": "QA 팀",
+      "owner": "이서연",
+      "members": 4,
+      "status": "paused",
+      "description": "출시 전 품질 검증 시나리오를 관리한다.",
+      "createdAt": "2026-08-14T00:00:00.000Z",
+      "updatedAt": "2026-08-14T00:00:00.000Z"
+    },
+    {
+      "name": "테스트",
+      "owner": "담당자1",
+      "members": 2,
+      "status": "active",
+      "description": "111",
+      "id": "nbjUxYBjGTY",
+      "createdAt": "2026-08-14T08:04:45.781Z",
+      "updatedAt": "2026-08-14T08:04:45.781Z"
+    },
+    {
+      "name": "테스트",
+      "owner": "담당자2",
+      "members": 1,
+      "status": "active",
+      "description": "222",
+      "id": "tBscSO_lgjg",
+      "createdAt": "2026-08-14T08:05:08.445Z",
+      "updatedAt": "2026-08-14T08:05:08.445Z"
+    },
+    {
+      "name": "테스트2",
+      "owner": "담당자3",
+      "members": 3,
+      "status": "paused",
+      "description": "333",
+      "id": "4RbA3HQRZMI",
+      "createdAt": "2026-08-14T08:05:22.373Z",
+      "updatedAt": "2026-08-14T08:05:22.373Z"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
