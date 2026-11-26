@@ -15,9 +15,17 @@ test('FO 게시판의 정적 파일과 게시글 CRUD', async (t) => {
   ])
   const root = await fetch(address)
   assert.equal(root.status, 200)
-  assert.match(await root.text(), /게시판/)
-  for (const asset of ['/app.js', '/style.css']) {
-    assert.equal((await fetch(address + asset)).status, 200)
+  const html = await root.text()
+  assert.match(html, /게시판/)
+  assert.match(html, /id="root"/)
+  const script = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1]
+  const stylesheet = html.match(/href="(\/assets\/[^"]+\.css)"/)?.[1]
+  assert.ok(script, 'React 번들의 경로가 HTML에 있어야 합니다.')
+  assert.ok(stylesheet, '빌드된 CSS의 경로가 HTML에 있어야 합니다.')
+  for (const [path, mime] of [[script, 'text/javascript'], [stylesheet, 'text/css']]) {
+    const asset = await fetch(address + path)
+    assert.equal(asset.status, 200)
+    assert.match(asset.headers.get('content-type'), new RegExp(mime))
   }
 
   const api = address + '/api/posts'

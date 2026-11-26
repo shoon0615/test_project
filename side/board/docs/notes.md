@@ -7,11 +7,23 @@
   - [Node.js와 HTTP](#nodejs와-http)
   - [TypeScript](#typescript)
   - [npm과 설정 파일](#npm과-설정-파일)
+  - [React와 Vite](#react와-vite)
+    - [컴포넌트와 JSX](#컴포넌트와-jsx)
+    - [Hook과 상태](#hook과-상태)
+    - [자주 쓰는 용어와 패턴](#자주-쓰는-용어와-패턴)
 - [다음 계획](#다음-계획)
 
 ---
 
 ## 버전별 작업 기록
+
+### 2026-11-27 · 버전 3 · React + Vite 적용
+
+**요약** · 글 목록과 상세, 작성·수정 폼을 React 화면으로 옮겼다. 글을 조회하고 저장하는 기존 Node.js API는 그대로 사용한다.
+
+**자세히** · 입력값과 게시글 목록을 React 상태로 관리한다. 개발 중에는 Vite가 화면을 제공하고 `/api` 요청을 Node.js로 전달한다. `npm start`로 실행하면 Vite로 빌드한 화면과 API를 Node.js가 한 포트에서 제공한다.
+
+**확인** · `npm run typecheck`와 `npm test`가 통과했다. 브라우저에서도 빌드 모드와 개발 모드 각각에서 작성 → 상세 → 수정 → 새로고침 → 삭제를 확인했다.
 
 ### 2026-11-27 · 버전 2 · TypeScript 적용
 
@@ -116,12 +128,80 @@ JSON 응답
 
 **학습 순서** · `npm ci`로 설치 → `npm run build`로 변환 → `dist/server.js`를 Node.js가 실행하는 흐름 확인.
 
-**실습** · `npm run build`를 실행하고 `src/app.ts`와 `dist/app.js`를 비교해 타입 선언이 변환 결과에서 사라지는지 확인하세요.
+**실습** · `npm run build`를 실행하고 `src/server.ts`와 `dist/server.js`를 비교해 타입 선언이 변환 결과에서 사라지는지 확인하세요.
+
+### React와 Vite
+
+**정의** · React는 화면을 작은 단위인 컴포넌트로 만드는 라이브러리입니다. Vite는 개발 중 화면을 브라우저에 제공하고, 배포하거나 실행할 JavaScript·CSS를 빌드하는 도구입니다. [React 빠른 시작](https://react.dev/learn) · [Vite 가이드](https://vite.dev/guide/)
+
+**한눈에 보는 실행 흐름**
+
+> 폼 입력 → `useState` 갱신 → 저장 버튼 → `fetch()` → Vite가 Node.js API로 전달 → JSON 응답 → React 화면 갱신
+
+위 흐름은 개발 모드입니다. `npm start`에서는 Node.js가 화면과 API를 함께 제공하므로 브라우저 요청이 바로 Node.js에 도착합니다.
+
+#### 컴포넌트와 JSX
+
+**컴포넌트(Component)**는 화면을 구성하는 단위입니다. 글쓰기 폼 하나도 컴포넌트이고, 그 폼과 목록을 담는 게시판 전체도 컴포넌트입니다. 이 프로젝트에서는 컴포넌트를 함수로 만들고, `<PostForm />`처럼 대문자로 시작하는 이름으로 배치합니다.
+
+**JSX**는 React 화면을 작성할 때 자주 쓰는, HTML과 닮은 JavaScript 확장 문법입니다. 이 게시판에서는 TypeScript와 JSX를 함께 쓰므로 `.tsx` 파일에 작성합니다.
+
+> 개발자가 JSX 작성 → Vite가 JavaScript로 변환 → 브라우저가 실행 → React가 화면에 반영
+
+```tsx
+function PostTitle({ title }: { title: string }) {
+  return <h2>{title}</h2>
+}
+
+function PostDetail() {
+  return <PostTitle title="첫 게시글" />
+}
+```
+
+`PostTitle`은 제목을 보여주는 컴포넌트입니다. `<PostTitle title="첫 게시글" />`에서 건넨 `title`을 받아, JSX의 `{title}` 자리에 표시합니다. [HEROPY · React 핵심 패턴](https://www.heropy.dev/p/OidQSe) · [React 핵심 패턴 with TS](https://www.heropy.dev/p/QduRma) · [React · JSX 작성하기](https://react.dev/learn/writing-markup-with-jsx)
+
+#### Hook과 상태
+
+**Hook(훅)**은 컴포넌트가 React 기능을 쓰기 위해 호출하는 함수입니다. 예를 들어 `useState`를 쓰면 React가 입력값을 기억하고, 값이 바뀌었을 때 화면을 다시 계산합니다.
+
+| 게시판에서 사용하는 Hook | 언제 쓰나요? |
+| --- | --- |
+| `useState` | 화면에 보여 줄 값을 기억할 때. 폼의 제목과 본문을 저장합니다. |
+| `useEffect` | 화면에 표시된 조건에 맞춰 API나 브라우저 기능과 연결할 때. 목록 화면이 처음 나타나거나 다시 불러올 때 요청을 보냅니다. |
+| `useRef` | 실제 HTML 요소를 직접 다루거나 화면에 표시할 필요 없는 값을 보관할 때. `Dialog`에서 실제 `<dialog>`를 찾고 `showModal()`을 호출합니다. |
+
+`const [title, setTitle] = useState('')`에서 `title`은 현재 값이고, `setTitle()`은 다음 화면에 반영할 값을 정합니다. `useEffect`의 `[listVersion]`은 처음 화면이 나타난 뒤와 그 값이 바뀐 뒤에 목록을 불러오라는 뜻입니다. 이전 요청은 효과가 다시 실행되기 전이나 화면에서 사라질 때 취소합니다. 저장 버튼처럼 사용자 동작과 바로 연결되는 요청은 `onSubmit` 같은 이벤트 함수에 둡니다. [React · Effect가 필요 없는 경우](https://react.dev/learn/you-might-not-need-an-effect)
+
+| 다른 React 코드에서 자주 만나는 Hook | 언제 쓰나요? |
+| --- | --- |
+| `useContext` | 테마나 언어처럼 여러 하위 컴포넌트가 사용하는 값을 읽을 때. |
+| `useReducer` | 여러 동작에 따른 상태 변경 규칙을 함수 하나에 모을 때. |
+| `useMemo` / `useCallback` | 최적화가 필요할 때. 각각 계산 결과와 함수 자체를 의존성이 바뀔 때까지 재사용합니다. |
+| 커스텀 Hook | 여러 컴포넌트에서 같은 로직을 사용할 때. 예를 들어 연결 상태를 읽는 로직을 `useOnlineStatus`로 묶습니다. |
+
+일반적인 Hook은 컴포넌트나 커스텀 Hook의 함수 본문에서 호출합니다. React가 매번 같은 순서로 호출을 추적할 수 있도록 조건문이나 반복문 밖에 둡니다. [React · 내장 Hook](https://react.dev/reference/react/hooks) · [Hook 규칙](https://react.dev/reference/rules/rules-of-hooks) · [HEROPY · React Hooks 핵심 정리](https://www.heropy.dev/p/revOrg)
+
+#### 자주 쓰는 용어와 패턴
+
+| 용어 | 코드에서 읽는 법 |
+| --- | --- |
+| `props` | 부모가 자식에게 건네는 값. `<PostTitle title="첫 게시글" />`에서 `title`이 prop입니다. `onSave`처럼 실행할 함수도 건넬 수 있습니다. |
+| 렌더링 | React가 컴포넌트를 호출해 무엇을 표시할지 계산하는 과정입니다. 그다음 필요한 변경을 실제 화면에 반영합니다. |
+| 제어 입력 | `value={title}`로 상태를 입력창에 보여주고, `onChange`로 입력값을 다시 상태에 담습니다. |
+| 조건부 표시 | `listError && <button>다시 불러오기</button>`은 오류가 있을 때 버튼을 표시합니다. |
+| 목록과 `key` | `map()`으로 글마다 화면 요소를 만들고, `key={post.id}`로 목록 안에서 각 글을 구분합니다. |
+| `children`과 Fragment | `<Dialog>내용</Dialog>`의 내용은 `children`으로 전달됩니다. `<>...</>`는 여러 요소를 추가 HTML 태그 없이 묶습니다. |
+
+**학습 순서** · 컴포넌트와 JSX → `props` → 입력 이벤트와 `useState` → API 연결과 `useEffect`. [React 빠른 시작](https://react.dev/learn) · [HEROPY · Vite로 React 시작하기](https://www.heropy.dev/p/6iFzkB)
+
+**질문 · `@/App`은 어떤 파일인가요?** `@/`는 이 프로젝트의 `src/`를 가리키는 경로 별칭입니다. TypeScript는 [tsconfig.json](../tsconfig.json)의 `paths`로 타입을 검사하고, Vite는 [vite.config.ts](../vite.config.ts)의 별칭으로 `@/App`을 `src/App.tsx`에 연결합니다. Node.js 서버의 `@/post`는 타입 전용 가져오기이므로 실행할 JavaScript에는 남지 않습니다.
+
+**왜 CRA 대신 Vite인가요?** React 팀은 2025년 2월 새 프로젝트에서 Create React App(CRA) 사용을 권장하지 않는다고 발표했습니다. CRA는 예전 프로젝트를 읽을 때 참고하고, 이번에는 React 팀이 전환 대상으로 안내한 빌드 도구 중 Vite를 사용합니다. [React 팀의 CRA 공식 안내](https://react.dev/blog/2025/02/14/sunsetting-create-react-app)
+
+**실습** · 글을 하나 저장하고 개발자 도구의 **Network** 탭에서 `POST /api/posts`를 확인합니다. 그다음 [App.tsx](../src/App.tsx)의 `PostForm`에서 입력을 담는 `useState`와 저장 후 상세 화면을 여는 `onSave`를 찾아보세요.
 
 ---
 
 ## 다음 계획
 
-**v3 계획** · 기존 Node.js API를 그대로 두고 게시판 화면을 React로 옮깁니다. React는 화면을 구성하고, Vite는 개발 서버를 띄우고 React·TypeScript 코드를 빌드합니다. 이 구성으로 컴포넌트와 입력 상태를 먼저 익힌 뒤 v4에서 Next.js의 화면 주소와 API 구조를 배웁니다. [Vite 가이드](https://vite.dev/guide/)
-
-**왜 CRA 대신 Vite인가요?** React 팀은 2025년 2월 새 프로젝트에서 Create React App(CRA) 사용을 권장하지 않는다고 발표했습니다. CRA는 예전 프로젝트를 읽을 때 참고하고, 이번에는 React 팀이 전환 대상으로 안내한 빌드 도구 중 Vite를 사용합니다. [React 팀의 CRA 공식 안내](https://react.dev/blog/2025/02/14/sunsetting-create-react-app)
+**v4 계획** · React 화면을 Next.js로 옮겨 화면 주소를 파일로 정의하고, 기존 게시글 API를 Route Handler에서 처리합니다. 그다음 SQLite를 붙여 서버가 꺼져도 글이 남게 합니다.

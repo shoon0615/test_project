@@ -1,17 +1,33 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
-import { readFileSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 
-import type { Post, PostInput } from './post.js'
+import type { Post, PostInput } from '@/post'
 
 type PostInputError = { status: number; error: string }
 
 const posts = new Map<string, Post>()
-const publicFiles = new Map([
-  ['/', ['../public/index.html', 'text/html']],
-  ['/style.css', ['../public/style.css', 'text/css']],
-  ['/app.js', ['app.js', 'text/javascript']],
+const assetTypes = new Map([
+  ['js', 'text/javascript'],
+  ['css', 'text/css'],
 ])
+
+async function sendPage(path: string, response: ServerResponse): Promise<boolean> {
+  const extension = /^\/assets\/[\w-]+\.(js|css)$/.exec(path)?.[1]
+  const type = path === '/' ? 'text/html' : assetTypes.get(extension ?? '')
+  if (!type) return false
+
+  const file = new URL(path === '/' ? 'web/index.html' : 'web' + path, import.meta.url)
+  try {
+    const body = await readFile(file)
+    response.writeHead(200, { 'Content-Type': type + '; charset=utf-8' })
+    response.end(body)
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    sendJson(response, 404, { error: '빌드된 화면 파일을 찾을 수 없습니다.' })
+  }
+  return true
+}
 
 function sendJson(response: ServerResponse, status: number, data: unknown) {
   response.writeHead(status, {
@@ -51,14 +67,7 @@ async function readPost(request: IncomingMessage): Promise<PostInput | PostInput
 async function handleRequest(request: IncomingMessage, response: ServerResponse) {
   const { pathname } = new URL(request.url ?? '/', 'http://localhost')
   const method = request.method ?? ''
-  const file = publicFiles.get(pathname)
-  if (file && method === 'GET') {
-    const [name, type] = file
-    const body = readFileSync(new URL(name, import.meta.url))
-    response.writeHead(200, { 'Content-Type': type + '; charset=utf-8' })
-    response.end(body)
-    return
-  }
+  if (method === 'GET' && await sendPage(pathname, response)) return
 
   const collection = pathname === '/api/posts'
   const id = /^\/api\/posts\/([^/]+)$/.exec(pathname)?.[1]
