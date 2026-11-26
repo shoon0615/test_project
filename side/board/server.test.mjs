@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process'
 import test from 'node:test'
 
 test('FO 게시판의 정적 파일과 게시글 CRUD', async (t) => {
-  const server = spawn(process.execPath, ['server.mjs'], {
+  const server = spawn(process.execPath, ['dist/server.js'], {
     cwd: new URL('.', import.meta.url),
     env: { ...process.env, PORT: '0' },
   })

@@ -1,30 +1,43 @@
-const list = document.querySelector('#posts')
-const status = document.querySelector('#status')
-const retry = document.querySelector('#retry')
-const detail = document.querySelector('#detail')
-const postTitle = document.querySelector('#post-title')
-const postDate = document.querySelector('#post-date')
-const postContent = document.querySelector('#post-content')
-const detailStatus = document.querySelector('#detail-status')
-const edit = document.querySelector('#edit-post')
-const remove = document.querySelector('#delete-post')
-const closeDetail = document.querySelector('#close-detail')
-const editor = document.querySelector('#editor')
-const editorTitle = document.querySelector('#editor-title')
-const editorStatus = document.querySelector('#editor-status')
-const fields = document.querySelector('#editor-fields')
-const form = document.querySelector('#post-form')
-const title = document.querySelector('#title')
-const content = document.querySelector('#content')
+import type { Post, PostInput } from './post.js'
 
+const list = element<HTMLElement>('posts')
+const status = element<HTMLElement>('status')
+const retry = element<HTMLButtonElement>('retry')
+const detail = element<HTMLDialogElement>('detail')
+const postTitle = element<HTMLElement>('post-title')
+const postDate = element<HTMLElement>('post-date')
+const postContent = element<HTMLElement>('post-content')
+const detailStatus = element<HTMLElement>('detail-status')
+const edit = element<HTMLButtonElement>('edit-post')
+const remove = element<HTMLButtonElement>('delete-post')
+const closeDetail = element<HTMLButtonElement>('close-detail')
+const editor = element<HTMLDialogElement>('editor')
+const editorTitle = element<HTMLElement>('editor-title')
+const editorStatus = element<HTMLElement>('editor-status')
+const fields = element<HTMLFieldSetElement>('editor-fields')
+const form = element<HTMLFormElement>('post-form')
+const title = element<HTMLInputElement>('title')
+const content = element<HTMLTextAreaElement>('content')
+
+function element<T extends HTMLElement>(id: string): T {
+  const found = document.querySelector<T>('#' + id)
+  if (!found) throw new Error(`화면에서 #${id} 요소를 찾을 수 없습니다.`)
+  return found
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : '요청을 처리하지 못했습니다.'
+}
+
+const newPost = element<HTMLButtonElement>('new-post')
 const postsUrl = '/api/posts'
 const dateFormat = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })
-let detailRequest
-let activePost
-let editedId
+let detailRequest: AbortController | undefined
+let activePost: Post | null = null
+let editedId: string | undefined
 
-async function request(url, method = 'GET', data, signal) {
-  const options = { method, signal }
+async function request(url: string, method = 'GET', data?: PostInput, signal?: AbortSignal): Promise<Response> {
+  const options: RequestInit = { method, signal }
   if (data) {
     options.headers = { 'Content-Type': 'application/json' }
     options.body = JSON.stringify(data)
@@ -34,19 +47,25 @@ async function request(url, method = 'GET', data, signal) {
   try {
     response = await fetch(url, options)
   } catch (error) {
-    if (error.name === 'AbortError') throw error
+    if (signal?.aborted) throw error
     throw new Error('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해 주세요.')
   }
-  if (response.status === 204) return
-  const result = await response.json()
-  if (!response.ok) throw new Error(result.error)
-  return result
+  if (!response.ok) {
+    const result: { error: string } = await response.json()
+    throw new Error(result.error)
+  }
+  return response
+}
+
+async function requestJson<T>(url: string, method = 'GET', data?: PostInput, signal?: AbortSignal): Promise<T> {
+  const response = await request(url, method, data, signal)
+  return response.json()
 }
 
 async function loadPosts(message = '') {
   retry.hidden = true
   try {
-    const posts = await request(postsUrl)
+    const posts = await requestJson<Post[]>(postsUrl)
     list.replaceChildren()
     for (const post of posts) {
       const row = document.createElement('li')
@@ -63,12 +82,12 @@ async function loadPosts(message = '') {
     const count = posts.length ? `게시글 ${posts.length}개` : '게시글이 없습니다.'
     status.textContent = [message, count].filter(Boolean).join(' ')
   } catch (error) {
-    status.textContent = [message, error.message].filter(Boolean).join(' ')
+    status.textContent = [message, errorMessage(error)].filter(Boolean).join(' ')
     retry.hidden = false
   }
 }
 
-async function showPost(id) {
+async function showPost(id: string) {
   detailRequest?.abort()
   const controller = new AbortController()
   detailRequest = controller
@@ -82,7 +101,7 @@ async function showPost(id) {
   if (!detail.open) detail.showModal()
 
   try {
-    const post = await request(postsUrl + '/' + id, 'GET', undefined, controller.signal)
+    const post = await requestJson<Post>(postsUrl + '/' + id, 'GET', undefined, controller.signal)
     if (controller.signal.aborted) return
     activePost = post
     postTitle.textContent = post.title
@@ -92,11 +111,11 @@ async function showPost(id) {
     edit.disabled = false
     remove.disabled = false
   } catch (error) {
-    if (!controller.signal.aborted) detailStatus.textContent = error.message
+    if (!controller.signal.aborted) detailStatus.textContent = errorMessage(error)
   }
 }
 
-function openEditor(post) {
+function openEditor(post?: Post | null) {
   editedId = post?.id
   editorTitle.textContent = post ? '게시글 수정' : '글쓰기'
   editorStatus.textContent = ''
@@ -105,7 +124,7 @@ function openEditor(post) {
   editor.showModal()
 }
 
-document.querySelector('#new-post').addEventListener('click', () => openEditor())
+newPost.addEventListener('click', () => openEditor())
 retry.addEventListener('click', () => loadPosts())
 edit.addEventListener('click', () => openEditor(activePost))
 closeDetail.addEventListener('click', () => detail.close())
@@ -115,7 +134,7 @@ detail.addEventListener('cancel', (event) => {
 detail.addEventListener('close', () => {
   if (!detail.open) detailRequest?.abort()
 })
-document.querySelector('#cancel-edit').addEventListener('click', () => editor.close())
+element<HTMLButtonElement>('cancel-edit').addEventListener('click', () => editor.close())
 editor.addEventListener('cancel', (event) => {
   if (fields.disabled) event.preventDefault()
 })
@@ -126,14 +145,14 @@ form.addEventListener('submit', async (event) => {
   fields.disabled = true
   editorStatus.textContent = '저장 중입니다.'
   try {
-    const data = { title: title.value, content: content.value }
+    const data: PostInput = { title: title.value, content: content.value }
     const url = editedId ? postsUrl + '/' + editedId : postsUrl
-    const saved = await request(url, editedId ? 'PUT' : 'POST', data)
+    const saved = await requestJson<Post>(url, editedId ? 'PUT' : 'POST', data)
     fields.disabled = false
     editor.close()
     await Promise.all([loadPosts('게시글을 저장했습니다.'), showPost(saved.id)])
   } catch (error) {
-    editorStatus.textContent = error.message
+    editorStatus.textContent = errorMessage(error)
   } finally {
     fields.disabled = false
   }
@@ -148,10 +167,10 @@ remove.addEventListener('click', async () => {
   try {
     await request(postsUrl + '/' + activePost.id, 'DELETE')
     detail.close()
-    document.querySelector('#new-post').focus()
+    newPost.focus()
     await loadPosts('게시글을 삭제했습니다.')
   } catch (error) {
-    detailStatus.textContent = error.message
+    detailStatus.textContent = errorMessage(error)
     edit.disabled = false
     remove.disabled = false
   } finally {

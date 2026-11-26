@@ -1,15 +1,19 @@
-import { createServer } from 'node:http'
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 
-const posts = new Map()
+import type { Post, PostInput } from './post.js'
+
+type PostInputError = { status: number; error: string }
+
+const posts = new Map<string, Post>()
 const publicFiles = new Map([
-  ['/', ['index.html', 'text/html']],
-  ['/style.css', ['style.css', 'text/css']],
+  ['/', ['../public/index.html', 'text/html']],
+  ['/style.css', ['../public/style.css', 'text/css']],
   ['/app.js', ['app.js', 'text/javascript']],
 ])
 
-function sendJson(response, status, data) {
+function sendJson(response: ServerResponse, status: number, data: unknown) {
   response.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
@@ -17,8 +21,8 @@ function sendJson(response, status, data) {
   response.end(JSON.stringify(data))
 }
 
-async function readPost(request) {
-  const chunks = []
+async function readPost(request: IncomingMessage): Promise<PostInput | PostInputError> {
+  const chunks: Buffer[] = []
   let size = 0
   for await (const chunk of request) {
     size += chunk.length
@@ -28,28 +32,29 @@ async function readPost(request) {
     return { status: 413, error: '요청 데이터가 너무 큽니다.' }
   }
 
-  let input
+  let input: unknown
   try {
     input = JSON.parse(Buffer.concat(chunks).toString('utf8'))
   } catch {
     return { status: 400, error: 'JSON 형식을 확인해 주세요.' }
   }
 
-  const title = typeof input?.title === 'string' ? input.title.trim() : ''
-  const content = typeof input?.content === 'string' ? input.content.trim() : ''
+  const fields = typeof input === 'object' && input !== null ? input : {}
+  const title = 'title' in fields && typeof fields.title === 'string' ? fields.title.trim() : ''
+  const content = 'content' in fields && typeof fields.content === 'string' ? fields.content.trim() : ''
   if (!title || title.length > 100 || !content || content.length > 5000) {
     return { status: 400, error: '제목은 1~100자, 본문은 1~5,000자로 입력해 주세요.' }
   }
   return { title, content }
 }
 
-async function handleRequest(request, response) {
-  const { pathname } = new URL(request.url, 'http://localhost')
-  const { method } = request
+async function handleRequest(request: IncomingMessage, response: ServerResponse) {
+  const { pathname } = new URL(request.url ?? '/', 'http://localhost')
+  const method = request.method ?? ''
   const file = publicFiles.get(pathname)
   if (file && method === 'GET') {
     const [name, type] = file
-    const body = readFileSync(new URL('public/' + name, import.meta.url))
+    const body = readFileSync(new URL(name, import.meta.url))
     response.writeHead(200, { 'Content-Type': type + '; charset=utf-8' })
     response.end(body)
     return
@@ -71,30 +76,30 @@ async function handleRequest(request, response) {
     return sendJson(response, 200, [...posts.values()].reverse())
   }
 
-  // 본문을 받는 동안 다른 요청이 글을 지울 수 있으므로 그 뒤에 글을 찾는다.
-  let input
   if (method === 'POST' || method === 'PUT') {
-    input = await readPost(request)
-    if (input.error) return sendJson(response, input.status, { error: input.error })
-  }
+    const input = await readPost(request)
+    if ('error' in input) return sendJson(response, input.status, { error: input.error })
 
-  if (method === 'POST') {
-    const post = { id: randomUUID(), ...input, createdAt: new Date().toISOString() }
-    posts.set(post.id, post)
-    response.setHeader('Location', '/api/posts/' + post.id)
-    return sendJson(response, 201, post)
-  }
+    if (method === 'POST') {
+      const post: Post = { id: randomUUID(), ...input, createdAt: new Date().toISOString() }
+      posts.set(post.id, post)
+      response.setHeader('Location', '/api/posts/' + post.id)
+      return sendJson(response, 201, post)
+    }
 
-  const post = posts.get(id)
-  if (!post) return sendJson(response, 404, { error: '게시글을 찾을 수 없습니다.' })
-  if (method === 'GET') return sendJson(response, 200, post)
-  if (method === 'PUT') {
-    const updated = { ...post, ...input }
-    posts.set(id, updated)
+    // 본문을 받는 동안 글이 삭제될 수도 있으므로 검증 뒤에 조회한다.
+    const post = id ? posts.get(id) : undefined
+    if (!post) return sendJson(response, 404, { error: '게시글을 찾을 수 없습니다.' })
+    const updated: Post = { ...post, ...input }
+    posts.set(post.id, updated)
     return sendJson(response, 200, updated)
   }
 
-  posts.delete(id)
+  const post = id ? posts.get(id) : undefined
+  if (!post) return sendJson(response, 404, { error: '게시글을 찾을 수 없습니다.' })
+  if (method === 'GET') return sendJson(response, 200, post)
+
+  posts.delete(post.id)
   response.writeHead(204).end()
 }
 
@@ -108,5 +113,8 @@ const server = createServer(async (request, response) => {
 })
 
 server.listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '127.0.0.1', () => {
-  console.log(`http://localhost:${server.address().port}`)
+  const address = server.address()
+  if (address && typeof address === 'object') {
+    console.log(`http://localhost:${address.port}`)
+  }
 })

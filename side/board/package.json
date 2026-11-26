@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "@types/node": "22.20.7",
+    "typescript": "5.8.3"
+  },
+  "name": "board",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "npm run build && node dist/server.js",
+    "test": "npm run build && node --test server.test.mjs"
+  },
+  "private": true
+}
