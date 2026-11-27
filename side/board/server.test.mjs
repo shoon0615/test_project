@@ -2,12 +2,38 @@ import assert from 'node:assert/strict'
 import { once } from 'node:events'
 import { spawn } from 'node:child_process'
 import { createInterface } from 'node:readline'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
+import jsonServer from 'json-server'
 
 test('Next.js 게시판 화면과 게시글 CRUD', { timeout: 20_000 }, async (t) => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'board-json-server-'))
+  const dbFile = join(tempDir, 'db.json')
+  await writeFile(dbFile, '{"posts":[]}')
+  async function startStorage(port) {
+    const app = jsonServer.create()
+    app.use(jsonServer.bodyParser)
+    app.use(jsonServer.router(dbFile))
+    const storage = app.listen(port, '127.0.0.1')
+    await once(storage, 'listening')
+    return storage
+  }
+  let storage = await startStorage(0)
+  const { port } = storage.address()
+  const stopStorage = () => new Promise((resolve, reject) => {
+    storage.close((error) => error ? reject(error) : resolve())
+  })
+  t.after(async () => {
+    if (storage.listening) await stopStorage()
+    await rm(tempDir, { recursive: true, force: true })
+  })
+
+  const storageUrl = `http://127.0.0.1:${port}`
   const server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-H', '127.0.0.1', '-p', '0'], {
     cwd: new URL('.', import.meta.url),
-    env: { ...process.env, NEXT_TELEMETRY_DISABLED: '1' },
+    env: { ...process.env, NEXT_TELEMETRY_DISABLED: '1', JSON_SERVER_URL: storageUrl },
   })
   t.after(() => server.kill())
   server.stderr.pipe(process.stderr)
@@ -53,6 +79,12 @@ test('Next.js 게시판 화면과 게시글 CRUD', { timeout: 20_000 }, async (t
   const edited = await updated.json()
   assert.deepEqual(edited, { ...post, title: '수정', content: '새 본문' })
   assert.deepEqual(await (await fetch(api)).json(), [edited])
+
+  await stopStorage()
+  storage = await startStorage(port)
+  assert.deepEqual(await (await fetch(storageUrl + '/posts')).json(), [edited])
+  assert.deepEqual(await (await fetch(detail)).json(), edited)
+  assert.match(await (await fetch(pageUrl)).text(), /<h1>수정<\/h1>/)
 
   assert.equal((await fetch(detail, { method: 'DELETE' })).status, 204)
   assert.equal((await fetch(detail)).status, 404)

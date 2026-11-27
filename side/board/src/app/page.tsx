@@ -5,8 +5,8 @@ import { listPosts } from '@/server/posts'
 
 export const dynamic = 'force-dynamic'
 
-export default function BoardPage() {
-  const posts = listPosts()
+export default async function BoardPage() {
+  const posts = await listPosts()
 
   return (
     <main>

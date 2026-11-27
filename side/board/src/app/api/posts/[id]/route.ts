@@ -5,7 +5,7 @@ type PostRoute = { params: Promise<{ id: string }> }
 
 export async function GET(_request: Request, { params }: PostRoute) {
   const { id } = await params
-  const post = findPost(id)
+  const post = await findPost(id)
   return post ? postJson(post) : postNotFound()
 }
 
@@ -14,11 +14,11 @@ export async function PUT(request: Request, { params }: PostRoute) {
   const input = await readPostInput(request)
   if ('error' in input) return postJson({ error: input.error }, input.status)
 
-  const post = updatePost(id, input)
+  const post = await updatePost(id, input)
   return post ? postJson(post) : postNotFound()
 }
 
 export async function DELETE(_request: Request, { params }: PostRoute) {
   const { id } = await params
-  return removePost(id) ? new Response(null, { status: 204 }) : postNotFound()
+  return (await removePost(id)) ? new Response(null, { status: 204 }) : postNotFound()
 }

@@ -3,6 +3,7 @@
     "@types/node": "22.20.7",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19.3.0",
+    "concurrently": "9.2.1",
     "typescript": "5.8.3"
   },
   "name": "board",
@@ -13,10 +14,12 @@
     "typecheck": "next typegen && tsc --noEmit",
     "start": "next start --hostname 127.0.0.1",
     "test": "npm run build && node --test server.test.mjs",
-    "dev": "next dev --hostname 127.0.0.1"
+    "dev": "concurrently --kill-others --names db,next -P \"npm:dev:db\" \"next dev --hostname 127.0.0.1 {@}\" --",
+    "dev:db": "json-server --host 127.0.0.1 --port 3001 db.json"
   },
   "private": true,
   "dependencies": {
+    "json-server": "0.17.4",
     "next": "16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

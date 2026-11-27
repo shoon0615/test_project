@@ -12,11 +12,20 @@
     - [Hook과 상태](#hook과-상태)
     - [자주 쓰는 용어와 패턴](#자주-쓰는-용어와-패턴)
   - [Next.js](#nextjs)
+  - [json-server](#json-server)
 - [다음 계획](#다음-계획)
 
 ---
 
 ## 버전별 작업 기록
+
+### 2026-11-27 · 버전 5 · json-server 연결
+
+**요약** · 게시글 저장소를 메모리에서 json-server의 `db.json`으로 바꿨습니다. Next.js의 목록·상세와 기존 게시글 API가 같은 저장소를 사용합니다.
+
+**이유** · 개발용 REST API에 HTTP로 연결하고, 서버를 재시작한 뒤에도 작성한 글을 읽을 수 있습니다.
+
+**확인 방법** · `npm test`는 임시 JSON 파일로 CRUD를 실행하고, json-server를 다시 시작한 뒤 API와 상세 화면에서 수정한 글을 확인합니다.
 
 ### 2026-11-27 · 버전 4 · Next.js 적용
 
@@ -233,6 +242,24 @@ function PostDetail() {
 
 ---
 
+### json-server
+
+**정의** · JSON 파일을 읽고 써서 개발용 REST API를 제공하는 서버입니다. `db.json`에 `posts` 배열을 두면 `/posts`에서 목록을 조회하거나 새 글을 저장할 수 있습니다. [JSON Server 0.17.4 공식 문서](https://github.com/typicode/json-server/tree/v0.17.4)
+
+> 화면 조회 → Next.js 페이지 → json-server의 `/posts` → 저장된 글
+>
+> 글 저장 → Next.js의 `POST /api/posts` → 입력 검사·ID와 작성일 생성 → json-server의 `POST /posts` → `db.json`
+
+| 코드 | 게시판에서 하는 일 |
+| --- | --- |
+| `await fetch(...)` | Next.js에서 json-server로 보낸 HTTP 요청의 응답을 기다립니다. |
+| `cache: 'no-store'` | 조회할 때 캐시를 사용하지 않아 저장 직후 최신 글을 읽습니다. |
+| `PATCH /posts/{id}` | 제목과 본문만 바꾸고 기존 ID와 작성일은 유지합니다. 브라우저는 기존대로 Next.js에 `PUT /api/posts/{id}`를 보냅니다. |
+
+**실습** · 두 서버를 실행해 글을 저장한 뒤 `db.json`에서 글을 찾아보세요. 두 서버를 종료했다가 다시 켜고 같은 상세 주소를 열면 같은 글을 확인할 수 있습니다.
+
+---
+
 ## 다음 계획
 
-**v5 계획** · 메모리 저장소를 SQLite 파일로 바꿔 서버를 재시작해도 글이 남도록 합니다.
+게시글 검색과 페이지 나누기를 진행합니다.

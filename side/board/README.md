@@ -21,9 +21,9 @@
 - **Component** · React 19.3.1, 프로젝트에서 직접 만든 컴포넌트
 - **Package Manager** · npm
 - **API** · Next.js Route Handler, JSON
-- **Storage** · 서버 메모리의 `Map`
+- **Storage** · json-server 0.17.4와 `db.json`
 
-서버를 재시작하면 게시글 목록이 비워집니다.
+json-server는 개발용 REST API를 제공하며 게시글을 `db.json`에 저장합니다. 같은 파일을 유지하면 서버를 재시작해도 글이 남습니다.
 
 ### 폴더 구조
 
@@ -40,11 +40,12 @@ side/board/
 │   │       ├── route.ts              # /api/posts — 목록·작성
 │   │       └── [id]/route.ts           # /api/posts/{id} — 상세·수정·삭제
 │   ├── components/                  # 글쓰기 폼, 대화상자, 수정·삭제 버튼
-│   ├── server/                      # 입력 검사와 메모리 저장소
+│   ├── server/                      # 입력 검사와 json-server 연결
 │   │   ├── post-http.ts
 │   │   └── posts.ts
 │   ├── api.ts                       # 화면에서 API를 호출하는 함수
 │   └── post.ts                      # 화면과 서버가 공유하는 게시글 타입
+├── db.json                         # 게시글 저장 파일
 ├── docs/notes.md                    # 버전별 작업 기록과 학습 노트
 ├── server.test.mjs                  # 화면과 API 통합 테스트
 ├── package.json                     # 의존성과 실행 명령
@@ -58,11 +59,12 @@ side/board/
 | v1 · 기본 게시판 | HTML·CSS, JavaScript | Node.js HTTP, JavaScript | 메모리 |
 | v2 · TypeScript | HTML·CSS, TypeScript | Node.js HTTP, TypeScript | 메모리 |
 | v3 · React + Vite | React 19, Vite 8, TypeScript | Node.js HTTP, TypeScript | 메모리 |
-| v4 · Next.js (현재) | Next.js 16 App Router, React 19, TypeScript, CSS | Next.js Route Handler | 메모리 |
+| v4 · Next.js | Next.js 16 App Router, React 19, TypeScript, CSS | Next.js Route Handler | 메모리 |
+| v5 · json-server (현재) | Next.js 16 App Router, React 19, TypeScript, CSS | Next.js Route Handler, json-server | `db.json` |
 
 ## 바로 실행
 
-Node.js 22.18 이상(22 계열) 또는 24 이상에서 저장소 루트를 기준으로 실행합니다. v4를 처음 실행할 때는 `npm ci`로 패키지를 설치합니다.
+Node.js 22.18 이상(22 계열) 또는 24 이상에서 저장소 루트를 기준으로 실행합니다. `npm run dev`는 concurrently로 json-server와 Next.js를 한 터미널에서 함께 실행합니다.
 
 ```bash
 cd side/board
@@ -70,11 +72,11 @@ npm ci
 npm run dev
 ```
 
-[localhost:3000](http://localhost:3000)에서 **글쓰기 → 저장 → 상세 → 수정 → 삭제**를 눌러 보세요. 게시글 제목을 누르면 상세 주소 `/posts/{id}`로 이동합니다. 서버는 `Ctrl+C`로 종료합니다.
+[localhost:3000](http://localhost:3000)에서 **글쓰기 → 저장 → 상세 → 수정 → 삭제**를 눌러 보세요. 게시글 제목을 누르면 상세 주소 `/posts/{id}`로 이동합니다. `Ctrl+C`를 누르면 두 서버가 함께 종료됩니다. 글을 저장하면 `db.json`에 내용이 기록되므로 파일을 열어 확인할 수 있습니다.
 
 - **Docker 개발 컨테이너**에서는 `npm run dev -- --hostname 0.0.0.0`으로 실행합니다. 원격 VS Code에서는 **Ports** 탭에서 3000번을 전달하고 **Open in Browser**를 누릅니다.
-- **3000번 포트가 사용 중**이면 `npm run dev -- --port 3001`로 다른 포트를 사용합니다.
-- **빌드한 결과 실행**은 `npm run build` 후 `npm start`입니다. Docker에서는 `npm start -- --hostname 0.0.0.0`을 사용합니다.
+- **Next.js 포트**는 기본 3000이며 사용 중이면 `npm run dev -- --port 3002`로 바꿀 수 있습니다. Next.js가 호출하는 json-server 주소는 기본 `http://127.0.0.1:3001`이며, 외부에서 별도로 실행한 json-server를 사용하려면 Next.js의 서버 환경 변수 `JSON_SERVER_URL`을 지정합니다.
+- **빌드한 결과 실행**은 `npm run build` 후 별도 터미널에서 `npm run dev:db`를 실행한 상태에서 `npm start`를 실행합니다. Docker에서는 `npm start -- --hostname 0.0.0.0`을 사용합니다.
 
 ## 변경 내용
 
@@ -85,6 +87,7 @@ npm run dev
 | 2026-11-27 | `v2` | 2    | npm으로 의존성 설치와 빌드·실행 명령 관리         |
 | 2026-11-27 | `v3` | 1    | 게시판 화면을 React 컴포넌트로 전환하고 Vite로 빌드 |
 | 2026-11-27 | `v4` | 1    | Next.js에서 목록·상세 URL과 게시글 API를 연결 |
+| 2026-11-27 | `v5` | 1    | json-server로 게시글을 파일에 저장 |
 
 ## 학습 로드맵
 
@@ -95,5 +98,6 @@ npm run dev
 | 3    | [v2 · npm과 설정 파일](docs/notes.md#npm과-설정-파일) | `npm start`가 빌드한 JavaScript의 위치 확인      |
 | 4 | [v3 · React와 Vite](docs/notes.md#react와-vite) | 입력 상태를 따라가고 글 저장 뒤 React 화면 갱신 확인 |
 | 5 | [v4 · Next.js](docs/notes.md#nextjs) | 상세 URL을 새 탭에서 열고 API 응답과 비교 |
+| 6 | [v5 · json-server](docs/notes.md#json-server) | 글을 저장하고 두 서버를 재시작한 뒤 같은 글 확인 |
 
-다음 프로젝트 단계는 **SQLite 저장소 → 검색·페이지 나누기 → 회원·권한 → 관리자 화면·API**입니다.
+다음 프로젝트 단계는 **검색·페이지 나누기 → 회원·권한 → 관리자 화면·API**입니다.
