@@ -11,11 +11,20 @@
     - [컴포넌트와 JSX](#컴포넌트와-jsx)
     - [Hook과 상태](#hook과-상태)
     - [자주 쓰는 용어와 패턴](#자주-쓰는-용어와-패턴)
+  - [Next.js](#nextjs)
 - [다음 계획](#다음-계획)
 
 ---
 
 ## 버전별 작업 기록
+
+### 2026-11-27 · 버전 4 · Next.js 적용
+
+**요약** · 목록은 `/`, 글 상세는 `/posts/{id}`에서 열리도록 Next.js App Router로 옮겼다. 기존 `/api/posts`와 `/api/posts/{id}`는 Route Handler가 처리한다.
+
+**자세히** · 화면을 만드는 페이지와 JSON을 응답하는 API가 메모리 저장소를 공유한다. 입력 폼과 버튼은 React 클라이언트 컴포넌트에서 처리하며, 글은 서버 프로세스를 종료하면 사라진다.
+
+**확인** · 타입 검사와 API 통합 테스트가 통과했다. 브라우저에서도 개발·빌드 모드 각각에서 글 작성, 상세 주소 직접 열기, 수정·삭제, 삭제된 주소의 404를 확인했다.
 
 ### 2026-11-27 · 버전 3 · React + Vite 적용
 
@@ -82,7 +91,7 @@ JSON 응답
 | `try` / `catch`                            | 잘못된 JSON을 읽을 때 생기는 오류를 잡아 사용자에게 오류 응답을 보냅니다.      |
 | `posts.set()` / `posts.get()`              | 글을 ID로 저장하거나 찾아옵니다.                                               |
 
-위 문법과 기능은 [server.ts](../src/server.ts)의 `createServer()`와 `readPost()` 주변에서 볼 수 있습니다.
+위 문법과 기능은 [v3의 server.ts](https://github.com/shoon0615/test_project/blob/ad93a3c5/side/board/src/server.ts)의 `createServer()`와 `readPost()` 주변에서 볼 수 있습니다.
 
 **실습** · 개발자 도구의 **Network** 탭을 열고 글을 저장합니다. `POST /api/posts` 요청에는 제목·본문, `201` 응답에는 새 ID·작성일이 있는지 확인하세요. [HEROPY · Node.js와 npm 시작하기](https://www.heropy.dev/p/bVoDlS)
 
@@ -128,7 +137,7 @@ JSON 응답
 
 **학습 순서** · `npm ci`로 설치 → `npm run build`로 변환 → `dist/server.js`를 Node.js가 실행하는 흐름 확인.
 
-**실습** · `npm run build`를 실행하고 `src/server.ts`와 `dist/server.js`를 비교해 타입 선언이 변환 결과에서 사라지는지 확인하세요.
+**실습** · v2나 v3에서 `npm run build`를 실행하면 `src/server.ts`가 `dist/server.js`로 변환됩니다. v4에서는 `npm run build`가 만든 Next.js 빌드 결과를 `.next/`에서 확인할 수 있습니다.
 
 ### React와 Vite
 
@@ -194,14 +203,36 @@ function PostDetail() {
 
 **학습 순서** · 컴포넌트와 JSX → `props` → 입력 이벤트와 `useState` → API 연결과 `useEffect`. [React 빠른 시작](https://react.dev/learn) · [HEROPY · Vite로 React 시작하기](https://www.heropy.dev/p/6iFzkB)
 
-**질문 · `@/App`은 어떤 파일인가요?** `@/`는 이 프로젝트의 `src/`를 가리키는 경로 별칭입니다. TypeScript는 [tsconfig.json](../tsconfig.json)의 `paths`로 타입을 검사하고, Vite는 [vite.config.ts](../vite.config.ts)의 별칭으로 `@/App`을 `src/App.tsx`에 연결합니다. Node.js 서버의 `@/post`는 타입 전용 가져오기이므로 실행할 JavaScript에는 남지 않습니다.
+**질문 · `@/App`은 어떤 파일인가요?** `@/`는 이 프로젝트의 `src/`를 가리키는 경로 별칭입니다. v3의 TypeScript는 `tsconfig.json`의 `paths`에서 경로를 찾고, Vite는 [v3의 vite.config.ts](https://github.com/shoon0615/test_project/blob/ad93a3c5/side/board/vite.config.ts)의 별칭으로 `@/App`을 `src/App.tsx`에 연결합니다. Node.js 서버의 `@/post`는 타입 전용 가져오기이므로 실행할 JavaScript에는 남지 않습니다.
 
 **왜 CRA 대신 Vite인가요?** React 팀은 2025년 2월 새 프로젝트에서 Create React App(CRA) 사용을 권장하지 않는다고 발표했습니다. CRA는 예전 프로젝트를 읽을 때 참고하고, 이번에는 React 팀이 전환 대상으로 안내한 빌드 도구 중 Vite를 사용합니다. [React 팀의 CRA 공식 안내](https://react.dev/blog/2025/02/14/sunsetting-create-react-app)
 
-**실습** · 글을 하나 저장하고 개발자 도구의 **Network** 탭에서 `POST /api/posts`를 확인합니다. 그다음 [App.tsx](../src/App.tsx)의 `PostForm`에서 입력을 담는 `useState`와 저장 후 상세 화면을 여는 `onSave`를 찾아보세요.
+**실습** · 글을 하나 저장하고 개발자 도구의 **Network** 탭에서 `POST /api/posts`를 확인합니다. 그다음 [PostForm.tsx](../src/components/PostForm.tsx)에서 입력을 담는 `useState`와 저장에 성공했을 때 부모에게 알리는 `onSave`를 찾아보세요.
+
+### Next.js
+
+**정의** · Next.js는 React로 웹 앱을 만들 때 화면 주소, 서버에서 화면을 만드는 방법, HTTP API 등을 함께 제공하는 프레임워크입니다. App Router에서는 `app/` 안의 폴더와 파일 이름으로 주소를 정합니다. [Next.js · Pages와 Layouts](https://nextjs.org/docs/app/getting-started/layouts-and-pages)
+
+**한눈에 보는 실행 흐름**
+
+> 주소 열기 → `page.tsx` → 서버에서 글 읽기 → 브라우저에 화면 표시
+>
+> 저장 버튼 → `fetch()` → `route.ts` → 입력 검사·저장 → JSON 응답 → 상세 주소로 이동
+
+| 파일 | 이 게시판에서 하는 일 |
+| --- | --- |
+| [layout.tsx](../src/app/layout.tsx) | 모든 페이지에 공통으로 적용할 HTML 틀과 CSS를 설정합니다. |
+| [page.tsx](../src/app/page.tsx) | `/`에서 글 목록을 보여줍니다. |
+| [posts/[id]/page.tsx](../src/app/posts/%5Bid%5D/page.tsx) | `/posts/{id}`의 ID를 `params`에서 꺼내 상세 글을 보여줍니다. |
+| [api/posts/route.ts](../src/app/api/posts/route.ts) | `GET`으로 목록을 반환하고, `POST`로 글을 작성합니다. |
+| [PostForm.tsx](../src/components/PostForm.tsx) | `'use client'`로 표시한 폼입니다. 입력 상태와 저장 이벤트를 처리합니다. |
+
+**서버와 클라이언트 컴포넌트** · 목록과 상세 페이지는 서버에서 글을 읽습니다. 입력 상태나 버튼 클릭은 클라이언트 컴포넌트가 브라우저에서 처리합니다. 상세 페이지처럼 없는 글을 만났을 때는 `notFound()`로 404 화면을 표시합니다. [Next.js · 서버와 클라이언트 컴포넌트](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+
+**실습** · 글을 쓰고 새 탭에서 상세 주소를 열어 보세요. 같은 ID로 `/api/posts/{id}`도 열면, 화면에 보인 제목·본문이 JSON으로 응답되는 것을 확인할 수 있습니다. [Next.js · Route Handler](https://nextjs.org/docs/app/api-reference/file-conventions/route)
 
 ---
 
 ## 다음 계획
 
-**v4 계획** · React 화면을 Next.js로 옮겨 화면 주소를 파일로 정의하고, 기존 게시글 API를 Route Handler에서 처리합니다. 그다음 SQLite를 붙여 서버가 꺼져도 글이 남게 합니다.
+**v5 계획** · 메모리 저장소를 SQLite 파일로 바꿔 서버를 재시작해도 글이 남도록 합니다.

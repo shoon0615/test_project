@@ -3,23 +3,21 @@
     "@types/node": "22.20.7",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.3.0",
-    "typescript": "5.8.3",
-    "vite": "^8.4.0"
+    "typescript": "5.8.3"
   },
   "name": "board",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.server.json && tsc && vite build",
-    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc",
-    "start": "npm run build && node dist/server.js",
+    "build": "next build",
+    "typecheck": "next typegen && tsc --noEmit",
+    "start": "next start --hostname 127.0.0.1",
     "test": "npm run build && node --test server.test.mjs",
-    "dev": "vite",
-    "dev:api": "node --watch src/server.ts"
+    "dev": "next dev --hostname 127.0.0.1"
   },
   "private": true,
   "dependencies": {
+    "next": "16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

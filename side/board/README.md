@@ -11,40 +11,70 @@
 
 ## 한눈에 보기
 
-| 구분 | v1 · 기본 게시판 | v2 · TypeScript | v3 · React + Vite (현재) |
-| --- | --- | --- | --- |
-| 화면 | HTML·CSS, JavaScript | HTML·CSS, TypeScript | React 19, Vite 8, TypeScript, CSS |
-| 서버 | Node.js 내장 HTTP, JavaScript | Node.js 내장 HTTP, TypeScript | Node.js 내장 HTTP, TypeScript |
-| 데이터 | 서버 메모리의 `Map` | 서버 메모리의 `Map` | 서버 메모리의 `Map` |
-| 실행 | `node server.mjs` | `npm start` | `npm start` |
+### ⚙️ 기술 스택
 
-글은 서버가 켜져 있는 동안 남습니다. 서버를 재시작하면 목록이 비워집니다.
+- **IDE** · VS Code (Visual Studio Code)
+- **Node.js** · 22.23.5 (검증 환경)
+- **Framework** · Next.js 16.4.6 (App Router)
+- **Language** · TypeScript 5.8.3
+- **CSS** · 기본 CSS (`globals.css`)
+- **Component** · React 19.3.1, 프로젝트에서 직접 만든 컴포넌트
+- **Package Manager** · npm
+- **API** · Next.js Route Handler, JSON
+- **Storage** · 서버 메모리의 `Map`
+
+서버를 재시작하면 게시글 목록이 비워집니다.
+
+### 폴더 구조
+
+```text
+side/board/
+├── src/
+│   ├── app/                         # Next.js 화면과 URL
+│   │   ├── layout.tsx                # 공통 화면 틀
+│   │   ├── globals.css               # 공통 스타일
+│   │   ├── page.tsx                  # / — 게시글 목록
+│   │   ├── posts/
+│   │   │   └── [id]/page.tsx           # /posts/{id} — 게시글 상세
+│   │   └── api/posts/
+│   │       ├── route.ts              # /api/posts — 목록·작성
+│   │       └── [id]/route.ts           # /api/posts/{id} — 상세·수정·삭제
+│   ├── components/                  # 글쓰기 폼, 대화상자, 수정·삭제 버튼
+│   ├── server/                      # 입력 검사와 메모리 저장소
+│   │   ├── post-http.ts
+│   │   └── posts.ts
+│   ├── api.ts                       # 화면에서 API를 호출하는 함수
+│   └── post.ts                      # 화면과 서버가 공유하는 게시글 타입
+├── docs/notes.md                    # 버전별 작업 기록과 학습 노트
+├── server.test.mjs                  # 화면과 API 통합 테스트
+├── package.json                     # 의존성과 실행 명령
+└── tsconfig.json                    # TypeScript 설정과 @/ 경로 별칭
+```
+
+### 버전별 기술 변화
+
+| 버전 | 화면 | 서버 | 저장 |
+| --- | --- | --- | --- |
+| v1 · 기본 게시판 | HTML·CSS, JavaScript | Node.js HTTP, JavaScript | 메모리 |
+| v2 · TypeScript | HTML·CSS, TypeScript | Node.js HTTP, TypeScript | 메모리 |
+| v3 · React + Vite | React 19, Vite 8, TypeScript | Node.js HTTP, TypeScript | 메모리 |
+| v4 · Next.js (현재) | Next.js 16 App Router, React 19, TypeScript, CSS | Next.js Route Handler | 메모리 |
 
 ## 바로 실행
 
-Node.js 22.18 이상(22 계열) 또는 24 이상에서 저장소 루트를 기준으로 실행합니다. v3를 처음 실행할 때는 `npm ci`로 패키지를 설치합니다.
+Node.js 22.18 이상(22 계열) 또는 24 이상에서 저장소 루트를 기준으로 실행합니다. v4를 처음 실행할 때는 `npm ci`로 패키지를 설치합니다.
 
 ```bash
 cd side/board
 npm ci
-npm start
+npm run dev
 ```
 
-[localhost:3000](http://localhost:3000)에서 **글쓰기 → 저장 → 수정 → 삭제**를 눌러 보세요. 서버는 `Ctrl+C`로 종료합니다.
+[localhost:3000](http://localhost:3000)에서 **글쓰기 → 저장 → 상세 → 수정 → 삭제**를 눌러 보세요. 게시글 제목을 누르면 상세 주소 `/posts/{id}`로 이동합니다. 서버는 `Ctrl+C`로 종료합니다.
 
-- **Docker 개발 컨테이너**에서는 `HOST=0.0.0.0 npm start`로 실행합니다. 원격 VS Code에서는 **Ports** 탭에서 3000번 포트를 전달하고 **Open in Browser**를 누릅니다.
-- **3000번 포트가 사용 중**이면 기존 게시판 서버를 종료하거나, 로컬에서는 `PORT=3001 npm start`로 실행합니다.
-
-### 개발 중에 화면을 수정한다면
-
-`side/board`에서 터미널 두 개를 열어 실행합니다. 화면 주소는 [localhost:3000](http://localhost:3000)입니다.
-
-| 터미널 | 명령 | 역할 |
-| --- | --- | --- |
-| 1 | `PORT=3001 npm run dev:api` | Node.js 게시글 API 실행 |
-| 2 | `npm run dev` | Vite로 React 화면 실행 및 편집 결과 반영 |
-
-Docker에서 Vite 화면을 열 때는 두 번째 명령을 `npm run dev -- --host 0.0.0.0`으로 실행합니다. `npm start`와 개발 모드는 기본적으로 같은 화면 포트를 사용하므로 먼저 실행 중인 쪽을 종료합니다.
+- **Docker 개발 컨테이너**에서는 `npm run dev -- --hostname 0.0.0.0`으로 실행합니다. 원격 VS Code에서는 **Ports** 탭에서 3000번을 전달하고 **Open in Browser**를 누릅니다.
+- **3000번 포트가 사용 중**이면 `npm run dev -- --port 3001`로 다른 포트를 사용합니다.
+- **빌드한 결과 실행**은 `npm run build` 후 `npm start`입니다. Docker에서는 `npm start -- --hostname 0.0.0.0`을 사용합니다.
 
 ## 변경 내용
 
@@ -54,6 +84,7 @@ Docker에서 Vite 화면을 열 때는 두 번째 명령을 `npm run dev -- --ho
 | 2026-11-27 | `v2` | 1    | 화면과 서버에 TypeScript 적용 및 게시글 타입 공유 |
 | 2026-11-27 | `v2` | 2    | npm으로 의존성 설치와 빌드·실행 명령 관리         |
 | 2026-11-27 | `v3` | 1    | 게시판 화면을 React 컴포넌트로 전환하고 Vite로 빌드 |
+| 2026-11-27 | `v4` | 1    | Next.js에서 목록·상세 URL과 게시글 API를 연결 |
 
 ## 학습 로드맵
 
@@ -63,5 +94,6 @@ Docker에서 Vite 화면을 열 때는 두 번째 명령을 `npm run dev -- --ho
 | 2    | [v2 · TypeScript](docs/notes.md#typescript)           | 제목에 숫자를 넣었을 때 타입 오류 확인           |
 | 3    | [v2 · npm과 설정 파일](docs/notes.md#npm과-설정-파일) | `npm start`가 빌드한 JavaScript의 위치 확인      |
 | 4 | [v3 · React와 Vite](docs/notes.md#react와-vite) | 입력 상태를 따라가고 글 저장 뒤 React 화면 갱신 확인 |
+| 5 | [v4 · Next.js](docs/notes.md#nextjs) | 상세 URL을 새 탭에서 열고 API 응답과 비교 |
 
-다음 프로젝트 단계는 **Next.js → SQLite 저장소 → 검색·페이지 나누기 → 회원·권한 → 관리자 화면·API**입니다.
+다음 프로젝트 단계는 **SQLite 저장소 → 검색·페이지 나누기 → 회원·권한 → 관리자 화면·API**입니다.
